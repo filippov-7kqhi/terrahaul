@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /cart.html
+Disallow: /checkout.html
+Disallow: /admin.html
+Sitemap: https://terrahaul.shop/sitemap.xml

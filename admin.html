@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Store admin &mdash; TerraHaul</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='7' fill='%23b45309'/%3E%3Cpath d='M4 26h24' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round'/%3E%3Cpath d='M8 22L11 13h14l-3 9z' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M11.5 13Q17.5 6 24.5 13' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/admin.css?v=1283428935">
+</head>
+<body>
+
+<form class="gate" id="gate">
+  <h1>Store admin</h1>
+  <p>TerraHaul &mdash; terrahaul.shop</p>
+  <div class="field"><label for="pass">Passphrase</label>
+    <input id="pass" type="password" autocomplete="current-password"></div>
+  <button class="btn btn--primary" type="submit" style="width:100%;justify-content:center">Unlock</button>
+  <p class="gmsg" id="gateMsg"></p>
+</form>
+
+<div id="app" hidden>
+  <header class="abar"><div class="wrap abar__in">
+    <div><p class="abrand">TerraHaul</p><p class="atitle">Store admin</p></div>
+    <div class="row">
+      <a class="btn btn--sm" href="index.html">View store</a>
+      <button class="btn btn--sm" id="signout">Sign out</button>
+    </div>
+  </div></header>
+
+  <div class="wrap">
+    <div class="tabs" role="tablist"><button role="tab" data-tab="live" aria-selected="true">Live</button><button role="tab" data-tab="orders" aria-selected="false">Orders</button><button role="tab" data-tab="customers" aria-selected="false">Customers</button><button role="tab" data-tab="abandoned" aria-selected="false">Abandoned</button><button role="tab" data-tab="insights" aria-selected="false">Insights</button><button role="tab" data-tab="settings" aria-selected="false">Settings</button></div>
+
+    <div class="notice danger" id="httpWarn" hidden>
+      <strong>This store is being served over plain HTTP.</strong> Switch on
+      <em>Enforce HTTPS</em> in Settings &rarr; Pages. Customers currently see
+      &ldquo;Not secure&rdquo;, and Merchant Center will not approve the store.
+    </div>
+
+    <div class="notice" id="noData" hidden>
+      <strong>No data source connected, so every figure below is empty rather than made up.</strong>
+      This store is static hosting &mdash; it has no server, so it cannot count visitors, hold
+      orders or total revenue on its own. Deploy the collector in
+      <code>stripe/analytics-worker.js</code> and put its URL in <code>analyticsEndpoint</code>
+      on the Settings tab. Setup is in <code>stripe/README.md</code>.
+    </div>
+
+    <!-- LIVE -->
+    <section data-panel="live">
+      <div class="grid g4">
+        <div class="card"><p class="stat__l">On the site now</p>
+          <p class="stat__v" data-k="active">&mdash;</p><p class="stat__s">Active in the last 5 minutes</p></div>
+        <div class="card"><p class="stat__l">Page views (24h)</p>
+          <p class="stat__v" data-k="pageViews">&mdash;</p><p class="stat__s">All pages</p></div>
+        <div class="card"><p class="stat__l">Checkouts started (24h)</p>
+          <p class="stat__v" data-k="checkoutStarted">&mdash;</p><p class="stat__s">Reached checkout</p></div>
+        <div class="card"><p class="stat__l">Revenue (24h)</p>
+          <p class="stat__v" data-k="revenue">&mdash;</p><p class="stat__s"><span data-k="orders">0</span> orders</p></div>
+      </div>
+
+      <div class="card" style="margin-top:1rem">
+        <div class="card__h"><h2>Conversion funnel &mdash; last 24 hours</h2>
+          <button class="btn btn--sm" id="refresh">Refresh</button></div>
+        <div class="funnel">
+          <div class="fstep"><b data-k="pageViews">&mdash;</b><span>Page views</span></div>
+          <div class="fstep"><b data-k="productViews">&mdash;</b><span>Product views</span></div>
+          <div class="fstep"><b data-k="addToCart">&mdash;</b><span>Add to basket</span></div>
+          <div class="fstep"><b data-k="checkoutStarted">&mdash;</b><span>Checkout started</span></div>
+          <div class="fstep"><b data-k="purchased">&mdash;</b><span>Purchased</span></div>
+        </div>
+        <div class="frates">
+          <span>View &rarr; basket: <b data-k="r1">&mdash;</b></span>
+          <span>Basket &rarr; checkout: <b data-k="r2">&mdash;</b></span>
+          <span>Checkout &rarr; paid: <b data-k="r3">&mdash;</b></span>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-top:1rem">
+        <div class="card"><div class="card__h"><h2>Visitors right now</h2></div>
+          <div id="visitors"><p class="empty">Nobody browsing at the moment.</p></div></div>
+        <div class="card"><div class="card__h"><h2>Latest activity</h2></div>
+          <div class="feed" id="feed"><p class="empty">No activity recorded.</p></div></div>
+      </div>
+    </section>
+
+    <!-- ORDERS -->
+    <section data-panel="orders" hidden>
+      <div class="card">
+        <div class="card__h"><h2>Orders</h2>
+          <a class="btn btn--sm" href="https://dashboard.stripe.com/payments" target="_blank" rel="noopener">Open in Stripe</a></div>
+        <div id="ordersBody"><p class="empty">No orders to show.</p></div>
+        <p class="muted" style="font-size:.8rem;margin-top:1rem">Stripe is the record of every
+          payment, refund and payout. This table mirrors it; the Dashboard is authoritative.</p>
+      </div>
+    </section>
+
+    <!-- CUSTOMERS -->
+    <section data-panel="customers" hidden>
+      <div class="card"><div class="card__h"><h2>Customers</h2></div>
+        <div id="customersBody"><p class="empty">No customers yet.</p></div></div>
+    </section>
+
+    <!-- ABANDONED -->
+    <section data-panel="abandoned" hidden>
+      <div class="card"><div class="card__h"><h2>Abandoned baskets (7 days)</h2></div>
+        <div id="abandonedBody"><p class="empty">No abandoned baskets recorded.</p></div>
+        <p class="muted" style="font-size:.8rem;margin-top:1rem">A basket counts as abandoned once
+          checkout was reached but no payment followed within an hour.</p></div>
+    </section>
+
+    <!-- INSIGHTS -->
+    <section data-panel="insights" hidden>
+      <div class="card"><div class="card__h"><h2>Machines by interest (7 days)</h2></div>
+        <div id="insightsBody"><p class="empty">No product data yet.</p></div></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section data-panel="settings" hidden>
+      <div class="card">
+        <h3 class="sec">Stripe Payment Links</h3>
+        <p class="sub">One per machine. Create them in the Stripe Dashboard with shipping address
+          collection and adjustable quantity on, and tax behaviour set to <em>inclusive</em>.
+          Leave one blank and that machine routes to an enquiry instead of taking payment.</p>
+        
+      <div class="field">
+        <label for="pl-TH-CREX6M">CREX6-M Mini Excavator <span class="muted">&mdash; &pound;4,999 &middot; TH-CREX6M</span></label>
+        <input id="pl-TH-CREX6M" data-link="TH-CREX6M" type="url"
+               placeholder="https://buy.stripe.com/…" autocomplete="off" spellcheck="false"></div>
+      <div class="field">
+        <label for="pl-TH-DP5000">DP5000 500 kg Tracked Mini Dumper <span class="muted">&mdash; &pound;2,499 &middot; TH-DP5000</span></label>
+        <input id="pl-TH-DP5000" data-link="TH-DP5000" type="url"
+               placeholder="https://buy.stripe.com/…" autocomplete="off" spellcheck="false"></div>
+      <div class="field">
+        <label for="pl-TH-TW1375G">TW 13/75G Petrol Wood Chipper <span class="muted">&mdash; &pound;2,199 &middot; TH-TW1375G</span></label>
+        <input id="pl-TH-TW1375G" data-link="TH-TW1375G" type="url"
+               placeholder="https://buy.stripe.com/…" autocomplete="off" spellcheck="false"></div>
+      <div class="field">
+        <label for="pl-TH-360SW">360 SW Stump Grinder <span class="muted">&mdash; &pound;2,599 &middot; TH-360SW</span></label>
+        <input id="pl-TH-360SW" data-link="TH-360SW" type="url"
+               placeholder="https://buy.stripe.com/…" autocomplete="off" spellcheck="false"></div>
+
+        <h3 class="sec">Business identity</h3>
+        <p class="sub">Shown in the footer of every page. Google Merchant Center and Stripe both
+          verify these against Companies House, so they must be your real details.</p>
+        <div class="f2"><div class="field"><label for="bz-company">Registered company name</label>
+        <input id="bz-company" data-biz-field="company" autocomplete="off" spellcheck="false"></div><div class="field"><label for="bz-companyNo">Companies House number</label>
+        <input id="bz-companyNo" data-biz-field="companyNo" autocomplete="off" spellcheck="false"></div><div class="field"><label for="bz-street">Registered address</label>
+        <input id="bz-street" data-biz-field="street" autocomplete="off" spellcheck="false"></div><div class="field"><label for="bz-city">Town or city</label>
+        <input id="bz-city" data-biz-field="city" autocomplete="off" spellcheck="false"></div><div class="field"><label for="bz-postcode">Postcode</label>
+        <input id="bz-postcode" data-biz-field="postcode" autocomplete="off" spellcheck="false"></div><div class="field"><label for="bz-phone">Phone number</label>
+        <input id="bz-phone" data-biz-field="phone" autocomplete="off" spellcheck="false"></div></div>
+
+        <h3 class="sec">Data collector</h3>
+        <p class="sub">URL of the analytics worker that feeds the tabs above, and of the optional
+          checkout endpoint for baskets holding more than one machine.</p>
+        <div class="field"><label for="an-ep">Analytics endpoint</label>
+          <input id="an-ep" data-cfg="analyticsEndpoint" type="url" placeholder="https://…workers.dev" spellcheck="false"></div>
+        <div class="field"><label for="ck-ep">Checkout endpoint (optional)</label>
+          <input id="ck-ep" data-cfg="checkoutEndpoint" type="url" placeholder="https://…workers.dev/checkout" spellcheck="false"></div>
+
+        <h3 class="sec">Save</h3>
+        <p class="sub">This produces <code>assets/js/site-config.js</code>. Copy it, replace that file
+          on GitHub, and commit. The site picks it up on the next load &mdash; no rebuild needed.
+          <strong>Never put a Stripe secret key in it.</strong></p>
+        <div class="row" style="margin-bottom:.8rem">
+          <button class="btn btn--primary" id="copyBtn" type="button">Copy file contents</button>
+          <button class="btn" id="dlBtn" type="button">Download</button>
+          <span class="muted" id="saveMsg" style="font-size:.83rem"></span>
+        </div>
+        <textarea class="out" id="out" rows="16" readonly spellcheck="false"></textarea>
+
+        <h3 class="sec">Change the passphrase</h3>
+        <p class="sub">This gate runs in the browser and anyone can read past it &mdash; it keeps a
+          casual visitor out, nothing more. Nothing here is confidential; committing to GitHub is
+          what actually authorises a change.</p>
+        <div class="row">
+          <input id="newpass" placeholder="New passphrase" spellcheck="false"
+                 style="flex:1;min-width:220px;padding:.6rem .75rem;border:1px solid var(--line);border-radius:8px">
+          <button class="btn" id="hashBtn" type="button">Show hash</button>
+        </div>
+        <p class="muted" id="hashOut" style="font-family:ui-monospace,monospace;font-size:.8rem;margin-top:.6rem"></p>
+      </div>
+    </section>
+  </div>
+  <div style="height:3rem"></div>
+</div>
+
+<script src="assets/js/site-config.js?v=ec29e2d166"></script>
+<script src="assets/js/admin.js?v=cd2028ea79"></script>
+</body>
+</html>
