@@ -1,96 +1,63 @@
-# Stripe setup
+# Payments and the Worker: TerraHaul
 
-All four stores are static sites on GitHub Pages, so there is no server to hold a
-Stripe secret key. Stripe's supported route for that is **Payment Links** — the old
-client-only `stripe.redirectToCheckout` was removed from Stripe.js and is no longer an
-option.
+## How terrahaul.shop takes payment
 
-## There is no "connect with my Stripe login"
+| Basket | Route |
+|---|---|
+| One machine | Its Stripe Payment Link, from `paymentLinks` in `assets/js/site-config.js` |
+| Several machines | `POST /checkout` on the Worker, which opens one Stripe Checkout Session |
 
-No Stripe API accepts an account email and password, and none should: those credentials
-control your money, they are second-factor gated, and handing them to any tool or person
-is the one mistake that cannot be undone quietly.
+The Worker prices a basket from the Stripe price ids in `analytics-worker.js`
+(`PRICES`), never from the browser, so an edited basket cannot change what is
+charged. The same Worker feeds `/admin.html`: `POST /event` records visits and
+`GET /stats` returns them, stored in the KV namespace `terrahaul-EVENTS`.
 
-What Stripe does have is a **restricted API key** — a credential you create yourself,
-scope to exactly what a job needs, and revoke in one click. That is what the script below
-uses, and it is the closest thing to what you actually want.
+- Worker: `https://terrahaul-collector.stellapark1141.workers.dev`
+- Config: `stripe/wrangler.toml`
 
-## The fast way — 16 links in one command
+## Update products, prices and payment links
 
-```bash
-# Dashboard -> Developers -> API keys -> Create restricted key
-# WRITE on: Products, Prices, Payment links.  Everything else: None.
+This store shares a Stripe account with the others, so `--any-account` is
+needed: without it the script refuses a key whose account name is not TerraHaul.
+Run in PowerShell; paste the whole block, and it asks for the key once:
 
-STRIPE_API_KEY=rk_live_...  python3 setup-payment-links.py
-```
-
-It reads each store's live catalogue, so it always matches what is on sale, and creates
-per machine:
-
-- a **product** with the machine's name, its photograph and a link back to its page
-- a **price** in GBP
-- a **payment link** with UK shipping address collection, a phone number, an adjustable
-  quantity and a *Delivery access notes* field — the carrier telephones to book a slot,
-  and nothing else on a static site ever gets the chance to ask about gate width or
-  gradient
-
-Run it from inside a store repo and it does that store; run it from anywhere else and it
-does all four. It prints one block per store, ready to paste — add `--write` and it edits
-`site-config.js` for you instead. Only the `paymentLinks` block is touched; the admin
-hash and every other setting survive.
-
-`--dry-run` lists what it would create and changes nothing. Worth doing first.
-
-Running it again is safe: products are created at fixed ids and reused, a price is
-reused while the amount still matches, and a machine that already has a link is left
-alone. Nothing is ever deleted.
-
-`--vat-inclusive` marks the prices VAT-inclusive. Use it only if the company is VAT
-registered — none of the four currently shows a VAT number.
-
-## The manual way
-
-If you would rather click than run anything: **Product catalogue → Add product**, one per
-machine, price in GBP. Then **Payment Links → New link**, pick the product, and switch on
-shipping address collection (GB), adjustable quantity, and a custom text field named
-`Delivery access notes`. Copy each URL.
-
-Paste the URLs into `assets/js/site-config.js` in each store repo, or through
-`/admin.html` on the store itself:
-
-```js
-paymentLinks: {
-  "TH-CREX6M": "https://buy.stripe.com/xxxxxxxx",
-  ...
+```powershell
+& {
+  $env:STRIPE_API_KEY = (Read-Host "Paste the Stripe key and press Enter").Trim()
+  Set-Location "C:\Users\Hp\uk-stores\terrahaul\stripe"
+  & "C:\Users\Hp\AppData\Local\Programs\Python\Python312\python.exe" setup-payment-links.py --any-account --write
+  Remove-Item Env:STRIPE_API_KEY
 }
 ```
 
-The site reads that file at runtime, so you can edit it straight on GitHub — no rebuild
-needed. Sixteen links in total: four machines on each of four stores.
+It is safe to repeat. Products keep fixed ids, prices are reused while the amount
+matches, and existing links are left alone (they print as `reused`). `--write`
+updates the links in `site-config.js`, the price ids in `analytics-worker.js` and
+`price_ids.json`. Nothing is ever deleted.
 
-**Never put a secret key (`sk_live_…`, `rk_live_…`) in this file or anywhere in the
-repo,** and never paste one into a chat window. Payment Link URLs are public by design;
-keys are not. If one is ever exposed, roll it in the Dashboard immediately.
+## Deploy the Worker and set its secrets
 
-## What happens once links are in
+Call `wrangler.cmd`, not `wrangler`: PowerShell's execution policy blocks the
+`.ps1` shim. Set secrets with `secret bulk` from a file. Typing a secret at
+`wrangler secret put`'s prompt stored only its first character on this machine.
 
-| Basket | Behaviour |
-|---|---|
-| **Buy now** on a product page | Straight to that machine's Stripe page |
-| One machine in the basket | Checkout shows **Pay securely with Stripe** |
-| Two or more *different* machines | Checkout explains they must be paid for one at a time, or invoiced — unless the Worker below is running |
-| A machine with no link pasted in | Checkout says payment is not switched on and routes to an enquiry, rather than pretending |
+```powershell
+& {
+  $w = "C:\Users\Hp\AppData\Roaming\npm\wrangler.cmd"
+  $key = (Read-Host "Paste the Stripe key and press Enter").Trim()
+  Set-Location "C:\Users\Hp\uk-stores\terrahaul\stripe"
+  & $w deploy
+  $tmp = "$env:TEMP\stripe-secret.json"
+  @{ STRIPE_SECRET_KEY = $key } | ConvertTo-Json | Set-Content $tmp -Encoding ascii
+  & $w secret bulk $tmp
+  Remove-Item $tmp
+}
+```
 
-## Multi-machine baskets, and the admin dashboard
+`ADMIN_HASH` is the `passHash` from `site-config.js`, set the same way.
 
-`analytics-worker.js` is an optional Cloudflare Worker serving three routes:
+## Do not
 
-- `POST /event` and `GET /stats` — the data behind `/admin.html`. Without an endpoint the
-  dashboard shows nothing rather than inventing figures.
-- `POST /checkout` — creates a Stripe Checkout Session for a basket holding more than one
-  machine. It reads prices from Stripe rather than from the browser, so a tampered basket
-  cannot change what is charged.
-
-Deploy it with Wrangler, put the secret key in with `wrangler secret put STRIPE_SECRET_KEY`
-— never in the file — and set `analyticsEndpoint` and `checkoutEndpoint` in each store's
-`site-config.js`.
+- commit a key, or paste one into a chat. Roll it in the Stripe Dashboard if you do.
+- delete the KV namespace `terrahaul-EVENTS`. It holds the dashboard's data.
+- type a key after `secret put NAME`. The name is the name; the value goes through the file.

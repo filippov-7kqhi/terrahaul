@@ -138,18 +138,12 @@ section{padding:4rem 0}
 .priceblock{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius);padding:1.3rem;margin:1.2rem 0}
 .priceblock__row{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap}
 .price{font-family:var(--head);font-size:2.9rem;color:var(--brand);line-height:1}
-.was{color:var(--ink-3);text-decoration:line-through;font-size:1.1rem}
-.save{background:var(--red);color:#fff;font-size:.76rem;font-weight:800;padding:.28rem .6rem;border-radius:6px;letter-spacing:.05em}
 .vatline{font-size:.84rem;color:var(--ink-3);margin-top:.35rem}
 .specgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin:1.2rem 0}
 .specgrid div{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:.8rem .9rem}
 .specgrid small{display:block;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.2rem}
 .specgrid b{font-size:1rem}
 @media(max-width:420px){.specgrid{grid-template-columns:1fr}}
-
-.trustrow{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-top:1.2rem}
-.trustrow div{text-align:center;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:.85rem .5rem;font-size:.78rem;color:var(--ink-2);font-weight:600}
-.trustrow b{display:block;color:var(--ink);font-size:.84rem}
 
 /* ---- spec table ---- */
 .spectable{width:100%;border-collapse:collapse;font-size:.95rem}
@@ -169,12 +163,6 @@ section{padding:4rem 0}
 .acc summary::after{content:"+";color:var(--brand);font-size:1.5rem;line-height:1;flex:0 0 auto}
 .acc details[open] summary::after{content:"−"}
 .acc .acc__body{padding:0 1.3rem 1.2rem;color:var(--ink-2)}
-
-/* ---- reviews ---- */
-.review{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius);padding:1.4rem}
-.stars{color:#facc15;letter-spacing:.12em;font-size:.95rem}
-.review p{font-size:.95rem;color:var(--ink-2)}
-.review footer{font-size:.84rem;color:var(--ink-3);font-weight:600}
 
 /* ---- steps ---- */
 .steps{counter-reset:s;display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem}
@@ -240,7 +228,6 @@ section{padding:4rem 0}
 .pagehead h1{margin-bottom:.5rem}
 .band{background:var(--bg-2);border-block:1px solid var(--line)}
 .cards .card__actions{display:grid;gap:.5rem;margin-top:.4rem}
-.incvat{font-size:.78rem;color:var(--ink-3);font-weight:600}
 
 /* ---- buy row ---- */
 .buyrow{display:flex;gap:.7rem;align-items:stretch;margin-top:.4rem}
@@ -290,8 +277,6 @@ section{padding:4rem 0}
 /* ---- forms ---- */
 fieldset{border:1px solid var(--line);border-radius:var(--radius);padding:1.2rem;margin:0 0 1.1rem}
 legend{padding:0 .5rem;font-weight:800;font-size:.86rem;letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
-.field2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-@media(max-width:520px){.field2{grid-template-columns:1fr}}
 .check{display:flex;gap:.7rem;align-items:flex-start;font-size:.9rem;color:var(--ink-2)}
 .check input{margin-top:.25rem;width:18px;height:18px;flex:0 0 18px}
 .check a{color:var(--brand);text-decoration:underline}
@@ -327,8 +312,6 @@ legend{padding:0 .5rem;font-weight:800;font-size:.86rem;letter-spacing:.08em;tex
 /* ---- footer payment strip ---- */
 .footer__pay{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:2rem;
   padding-top:1.4rem;border-top:1px solid var(--line);font-size:.82rem}
-.paychip{background:var(--bg-3);border:1px solid var(--line);border-radius:6px;padding:.3rem .6rem;
-  font-size:.72rem;font-weight:800;letter-spacing:.04em;color:var(--ink-2)}
 
 .buynote{font-size:.82rem;color:var(--ink-3);margin:.6rem 0 0}
 .stickybuy__btns{display:flex;gap:.5rem}
@@ -341,16 +324,6 @@ legend{padding:0 .5rem;font-weight:800;font-size:.86rem;letter-spacing:.08em;tex
 .result.show{margin-top:1.1rem}
 .result strong{color:var(--ink)}
 .result a{color:var(--brand);text-decoration:underline}
-.warnbox{background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.45);border-radius:var(--radius);
-  padding:1.2rem 1.4rem;margin-top:1.2rem;font-size:.94rem;color:var(--ink-2);line-height:1.7}
-.warnbox strong{color:var(--ink)}
-.outbox{width:100%;margin-top:1rem;background:var(--bg-3);border:1px solid var(--line);border-radius:10px;
-  padding:1rem;color:var(--ink-2);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  font-size:.82rem;line-height:1.6;resize:vertical}
-.btnrow{display:flex;gap:.7rem;flex-wrap:wrap}
-.adminlinks{color:var(--ink-2);font-size:.94rem;padding-left:1.1rem;line-height:1.8}
-.adminlinks strong{color:var(--ink)}
-.adminlinks a{color:var(--brand);text-decoration:underline}
 #panel h2{margin-top:2rem;font-size:1.5rem}
 #panel code{background:var(--bg-3);padding:.1rem .4rem;border-radius:4px;font-size:.88em}
 
