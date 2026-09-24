@@ -10,6 +10,8 @@ for anything else. That is what this uses.
 
     1. Stripe Dashboard -> Developers -> API keys -> Create restricted key
     2. Give it WRITE on:  Products,  Prices,  Payment links
+       and READ on:     Account   -- so this can check the key opens the
+                                     account you think it does.
        Leave everything else on "None".
     3. Run:  STRIPE_API_KEY=rk_live_... python3 setup-payment-links.py
 
@@ -66,6 +68,16 @@ def call(key, method, path, data=None):
                     "Your restricted key is missing a permission. It needs WRITE on\n"
                     "Products, Prices and Payment links.\n")
         raise SystemExit(f"\nStripe refused {method} {path}: {msg}\n" + hint)
+
+
+def probe_account(key):
+    """Who does this key belong to? Answered without dying, because a restricted
+       key may lack Account read -- not knowing is a weaker problem than being
+       unable to run at all."""
+    try:
+        return call(key, "GET", "/account"), None
+    except SystemExit as e:
+        return None, str(e).strip().splitlines()[0]
 
 
 def flatten(d, prefix=""):
@@ -204,6 +216,9 @@ def main():
                     help="paste the links into the store's site-config.js")
     ap.add_argument("--dry-run", action="store_true",
                     help="show what would be created and change nothing")
+    ap.add_argument("--any-account", action="store_true",
+                    help="skip the check that the key belongs to this store's own "
+                         "Stripe account. You almost never want this.")
     ap.add_argument("--vat-inclusive", action="store_true",
                     help="mark prices VAT-inclusive. Only if the company is VAT registered.")
     args = ap.parse_args()
@@ -229,9 +244,29 @@ def main():
     if args.write and not (args.local or repo_root):
         raise SystemExit("--write needs --local, or to be run from inside a store repo")
 
-    acct = call(key, "GET", "/account")
-    print(f"Stripe account: {acct.get('settings', {}).get('dashboard', {}).get('display_name') or acct['id']}"
-          f"  ({'LIVE' if not key.startswith(('sk_test', 'rk_test')) else 'TEST'} mode)\n")
+    mode = "TEST" if key.startswith(("sk_test", "rk_test")) else "LIVE"
+    acct, why = probe_account(key)
+    name = ""
+    if acct is None:
+        print(f"! Cannot read the account name: {why}\n"
+              "  Add Read on 'Account' to the restricted key so this can confirm\n"
+              "  the key belongs to the right store.\n", file=sys.stderr)
+    else:
+        name = acct.get("settings", {}).get("dashboard", {}).get("display_name") or ""
+        print(f"Stripe account: {name or acct['id']}  ({mode} mode)\n")
+
+    # One store, one Stripe account. A key from the wrong account creates this
+    # store's machines in another business's books, and --write then publishes
+    # those links to the live site -- so a customer's money lands there too,
+    # with nothing on screen to say so.
+    want = sorted(STORES)[0]
+    if name and len(STORES) == 1 and not args.any_account:
+        if want not in re.sub(r"[^a-z0-9]", "", name.lower()):
+            raise SystemExit(
+                f"\nThis key opens the Stripe account {name!r}, but you are setting up\n"
+                f"{want}. Payment for a {want} machine would be collected by {name!r}.\n\n"
+                f"Use a key from {want}'s own Stripe account. If you genuinely mean to\n"
+                f"use this one, pass --any-account.")
 
     known = existing_links_by_sku(key)
     for store in (args.store or sorted(STORES)):
