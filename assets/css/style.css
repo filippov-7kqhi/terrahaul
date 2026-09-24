@@ -439,3 +439,19 @@ h2{font-size:clamp(2.2rem,4.8vw,3.4rem)}
   background:var(--bg-2);color:var(--ink);border-top:0}
 .footer .logo b{color:#f59e0b}
 .priceblock{border:2px solid var(--line);background:#fffdf9}
+
+/* ---- inner pages: underlined heads, contents as a card, contact cards across the top ---- */
+.pagehead{background:#efe4d3;border-bottom:4px solid var(--brand);padding:3rem 0 2.2rem;margin-bottom:2rem}
+.pagehead h1::after{content:"";display:block;width:80px;height:6px;background:var(--brand);margin-top:.9rem;border-radius:3px}
+.policy{grid-template-columns:1fr;gap:1.8rem}
+.policy__toc{position:static;border:2px solid var(--line);background:var(--bg-2)}
+.policy__toc ul{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem 1.4rem}
+@media(max-width:700px){.policy__toc ul{grid-template-columns:1fr 1fr}}
+.policy__toc a{font-weight:600;color:var(--brand-2)}
+.policy__body{max-width:78ch}
+.grid-2:has(form.form){grid-template-columns:1fr}
+.grid-2:has(form.form)>div:last-child{order:-1;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.grid-2:has(form.form)>div:last-child .tile{margin:0!important;border:2px solid var(--line)}
+.grid-2:has(form.form)>div:first-child{max-width:760px}
+@media(max-width:860px){.grid-2:has(form.form)>div:last-child{grid-template-columns:1fr}}
+.summary,.checkout-panel{border:2px solid var(--line)}
