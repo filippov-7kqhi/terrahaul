@@ -455,3 +455,7 @@ h2{font-size:clamp(2.2rem,4.8vw,3.4rem)}
 .grid-2:has(form.form)>div:first-child{max-width:760px}
 @media(max-width:860px){.grid-2:has(form.form)>div:last-child{grid-template-columns:1fr}}
 .summary,.checkout-panel{border:2px solid var(--line)}
+
+/* product titles now carry a model attribute; sized so the price and
+   buy button stay in view beside the gallery */
+.buybox h1{font-size:clamp(2rem,3.3vw,2.8rem);line-height:1.12}
