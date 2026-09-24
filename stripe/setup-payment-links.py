@@ -30,6 +30,12 @@ a chat window -- roll it in the Dashboard if you ever do.
 """
 import argparse, json, os, re, sys, urllib.error, urllib.parse, urllib.request
 
+# A product name can carry a non-ASCII character, and Windows' console defaults
+# to a codepage that cannot encode it -- crashing a plain print() before
+# anything reaches Stripe. UTF-8 output fixes that everywhere, harmlessly.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 API = "https://api.stripe.com/v1"
 
 STORES = {
@@ -193,6 +199,22 @@ def existing_links_by_sku(key):
 
 
 # ----------------------------------------------------------------------- write --
+def write_worker_prices(path, prices):
+    """The Worker resolves a basket by price id, so it needs the ids the run
+       just produced. Written, never transcribed -- in a terminal font "l" and
+       "1" are the same glyph, and a wrong id fails at the payment step."""
+    if not os.path.exists(path):
+        return False
+    src = open(path, encoding="utf-8").read()
+    body = ",\n".join(f"  '{sku}': '{pid}'" for sku, pid in prices.items())
+    new, n = re.subn(r"const PRICES = \{.*?\n\};",
+                     "const PRICES = {\n" + body + ",\n};", src, flags=re.S)
+    if n != 1:
+        raise SystemExit(f"{path}: could not find the PRICES block to replace")
+    open(path, "w", encoding="utf-8").write(new)
+    return True
+
+
 def write_config(path, links):
     """Replace only the paymentLinks block, leaving every other setting alone."""
     src = open(path, encoding="utf-8").read()
@@ -275,6 +297,7 @@ def main():
         items = catalogue(store, domain, args.local, root)
         print(f"{store} ({domain})")
         links = {}
+        price_ids = {}
         for sku, item in items.items():
             if args.dry_run:
                 have = sku in known
@@ -285,12 +308,23 @@ def main():
             price = price_for(key, product, item["price"] * 100, args.vat_inclusive)
             url, made = link_for(key, sku, price, domain, known)
             links[sku] = known[sku] = url
-            print(f"  {'created' if made else 'reused '}  {sku:12} £{item['price']:>6,}  {url}")
+            price_ids[sku] = price["id"]
+            # A price id grants no access on its own, unlike an API key, so it
+            # is safe to print. It is what the Worker needs for multi-item
+            # baskets, which Payment Links cannot do.
+            print(f"  {'created' if made else 'reused '}  {sku:12} £{item['price']:>6,}  "
+                  f"{price['id']:<28} {url}")
         if args.write and not args.dry_run:
-            path = (f"{root}/assets/js/site-config.js" if root
-                    else f"{args.local}/{store}/assets/js/site-config.js")
-            write_config(path, links)
-            print(f"  written to {path}")
+            base = root or f"{args.local}/{store}"
+            write_config(f"{base}/assets/js/site-config.js", links)
+            print(f"  written to {base}/assets/js/site-config.js")
+            ids_path = f"{base}/stripe/price_ids.json"
+            os.makedirs(os.path.dirname(ids_path), exist_ok=True)
+            json.dump(price_ids, open(ids_path, "w", encoding="utf-8"), indent=2)
+            print(f"  written to {ids_path}")
+            worker = f"{base}/stripe/analytics-worker.js"
+            if write_worker_prices(worker, price_ids):
+                print(f"  written to {worker}  (redeploy the Worker to apply)")
         print()
 
     if args.dry_run:

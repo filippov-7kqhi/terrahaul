@@ -1,0 +1,9 @@
+name = "terrahaul-collector"
+main = "analytics-worker.js"
+compatibility_date = "2026-01-01"
+
+# Created by:  wrangler kv namespace create EVENTS
+# Paste the id it prints in place of PUT_KV_ID_HERE before deploying.
+kv_namespaces = [
+  { binding = "EVENTS", id = "PUT_KV_ID_HERE" }
+]
