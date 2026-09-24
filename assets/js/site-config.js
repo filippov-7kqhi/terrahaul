@@ -32,9 +32,9 @@ window.SITE_CONFIG = {
   // One Stripe Payment Link per machine. Blank = that machine routes to an
   // enquiry instead of pretending to take payment.
   paymentLinks: {
-    "TH-CREX6M": "",
-    "TH-DP5000": "",
-    "TH-TW1375G": "",
-    "TH-360SW": ""
+    "TH-CREX6M": "https://buy.stripe.com/5kQ9AT2Kiff00ck9nm6c00s",
+    "TH-DP5000": "https://buy.stripe.com/fZu7sLdoWgj41go0QQ6c00t",
+    "TH-TW1375G": "https://buy.stripe.com/00wdR998GeaWf7e4326c00u",
+    "TH-360SW": "https://buy.stripe.com/eVq8wPacK6Iuf7eczy6c00v"
   }
 };
