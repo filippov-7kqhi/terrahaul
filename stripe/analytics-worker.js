@@ -30,8 +30,10 @@ const LIVE_WINDOW = 5 * 60e3;
 const KEEP = 7 * DAY;
 
 const PRICES = {
-  'TH-CREX6M': 'price_xxx', 'TH-DP5000': 'price_xxx',
-  'TH-TW1375G': 'price_xxx', 'TH-360SW': 'price_xxx',
+  'TH-CREX6M': 'price_1UJ2XyGd7L8SA737vXbzR0qs',
+  'TH-DP5000': 'price_1UJ2Y1Gd7L8SA737DFNGfTOf',
+  'TH-TW1375G': 'price_1UJ2Y4Gd7L8SA737FXyoNQpv',
+  'TH-360SW': 'price_1UJ2Y6Gd7L8SA737nMw0u8Wx',
 };
 
 export default {
