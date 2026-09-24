@@ -392,14 +392,37 @@
     });
   }
 
-  // ---- enquiry forms (no backend wired up) ---------------------------------
-  document.querySelectorAll('form[data-demo]').forEach(function (form) {
+  // ---- enquiry forms ---------------------------------------------------------
+  // No server sits behind these forms, so rather than claim a message was
+  // received, they open the visitor's own email app with it addressed and
+  // written out, and say plainly that Send still has to be pressed. The form
+  // is left filled in, so nothing is lost if no email app opens.
+  document.querySelectorAll('form[data-mailto]').forEach(function (form) {
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       if (!form.reportValidity()) return;
+      var to = form.dataset.mailto;
+      var lines = [];
+      Array.prototype.forEach.call(form.elements, function (el) {
+        if (!el.name || !el.value) return;
+        var lab = el.id && form.querySelector('label[for="' + el.id + '"]');
+        var name = lab ? lab.textContent.replace(/\s*\(optional\)|[?:]\s*$/gi, '').trim() : el.name;
+        lines.push(name + ': ' + el.value);
+      });
+      var subject = (form.dataset.subject || 'Enquiry').replace(/\{(\w+)\}/g, function (_, k) {
+        return form.elements[k] ? form.elements[k].value : '';
+      });
+      window.location.href = 'mailto:' + to + '?subject=' + encodeURIComponent(subject) +
+                             '&body=' + encodeURIComponent(lines.join('\n'));
+      var phone = ((cfg().business || {}).phone || '').trim();
       var box = form.parentElement.querySelector('.result');
-      if (box) { box.className = 'result show'; box.textContent = form.dataset.demo; }
-      form.reset();
+      if (box) {
+        box.className = 'result show';
+        box.innerHTML = 'Your email app should now open with this message addressed to ' +
+          '<a href="mailto:' + to + '">' + to + '</a>. Press <strong>Send</strong> there to reach us. ' +
+          'If nothing opened, email that address directly' +
+          (phone ? ' or call <a href="tel:' + phone.replace(/\s/g, '') + '">' + phone + '</a>' : '') + '.';
+      }
     });
   });
 

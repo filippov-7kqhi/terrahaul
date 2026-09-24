@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=9f2a41bd7d">
+<link rel="stylesheet" href="assets/css/style.css?v=a4dd824bd9">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -40,14 +40,14 @@
 <section class="pagehead"><div class="wrap" style="max-width:760px">
   <nav class="crumbs"><a href="index.html">Home</a> / <span>Track order</span></nav>
   <h1>Where is my machine?</h1>
-  <p class="muted">Enter the reference from your confirmation email. Crated machines move on a
+  <p class="muted">Send us the reference from your confirmation email and your delivery postcode, and we will reply with where your machine is &mdash; usually the same working day. Crated machines move on a
      tail-lift vehicle, so the carrier calls to book a slot before delivery.</p>
-  <form class="form" data-demo="No live order was found for that reference. Email support@terrahaul.shop with your order number and we will trace it the same working day." style="margin-top:1.6rem" novalidate>
+  <form class="form" data-mailto="support@terrahaul.shop" data-subject="Order status {ref}" style="margin-top:1.6rem" novalidate>
     <div class="field"><label for="ref">Order reference</label>
-      <input id="ref" name="ref" placeholder="TH-000000" required></div>
+      <input id="ref" name="ref" placeholder="From your confirmation email" required></div>
     <div class="field"><label for="pc">Delivery postcode</label>
       <input id="pc" name="postcode" placeholder="SW1A 1AA" required></div>
-    <button class="btn btn--primary btn--lg" type="submit">Track order</button>
+    <button class="btn btn--primary btn--lg" type="submit">Email us for an update</button>
   </form>
   <div class="result" role="status"></div>
 </div></section>
@@ -96,8 +96,8 @@
     </div>
   </div>
 </footer>
-<script src="assets/js/site-config.js?v=ec29e2d166"></script>
-<script src="assets/js/catalogue.js?v=7c7ed4428c"></script>
-<script src="assets/js/script.js?v=730a908715"></script>
+<script src="assets/js/site-config.js?v=3596809a5b"></script>
+<script src="assets/js/catalogue.js?v=4d5d542cf0"></script>
+<script src="assets/js/script.js?v=16be53cd1c"></script>
 </body>
 </html>
