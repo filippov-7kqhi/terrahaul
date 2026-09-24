@@ -374,3 +374,68 @@ legend{padding:0 .5rem;font-weight:800;font-size:.86rem;letter-spacing:.08em;tex
 .cta h2{color:#faf3e9}
 .cta .btn--ghost{border-color:#faf3e9;color:#faf3e9;background:rgba(255,255,255,.10)}
 .cta .btn--ghost:hover{background:#faf3e9;color:#2c1d0d}
+
+/* ==== IDENTITY LAYER: TerraHaul - warm earth, workwear ===================== */
+/* A dark-brown header in place of the announcement bar, a full-width
+   photograph with the headline on a card overlapping it, landscape machine
+   cards two to a row, and section heads underlined in burnt orange. */
+:root{--radius:8px}
+h1,h2,h3,h4{font-weight:400;letter-spacing:.015em}
+h2{font-size:clamp(2.2rem,4.8vw,3.4rem)}
+
+.btn{border-radius:8px}
+.btn--ghost{background:transparent;border-color:#241a10;color:#241a10}
+.btn--ghost:hover{background:#241a10;border-color:#241a10;color:#faf3e9}
+.btn--ghost.is-added{background:var(--brand);border-color:var(--brand);color:#fff}
+
+.topbar{display:none}
+.header{background:#2c1d0d;border-bottom:0;color:#faf3e9}
+.logo b{color:#f59e0b}
+.nav a{color:#e9dcc8}
+.nav a:hover,.nav a[aria-current="page"]{color:#f59e0b}
+.burger span{background:#faf3e9}
+@media(max-width:900px){.nav{background:#2c1d0d}}
+
+.hero{padding:0 0 3.4rem;background:var(--bg)}
+.hero__grid{width:100%;max-width:none;margin:0;grid-template-columns:1fr;gap:0}
+.hero__media{order:1;border:0;border-radius:0;box-shadow:none;height:min(62vh,560px)}
+.hero__media img{width:100%;height:100%;object-fit:cover;object-position:50% 55%}
+.hero__grid>div:first-child{order:2;position:relative;z-index:2;background:var(--bg-2);
+  width:min(100% - 2.4rem,720px);margin:-10rem 0 0 max(1.2rem,calc((100% - 1200px)/2));
+  padding:2.4rem 2.6rem 2.2rem;border-radius:10px;border-top:6px solid var(--brand);
+  box-shadow:0 30px 70px rgba(44,29,13,.25)}
+.hero h1{font-size:clamp(2.8rem,6vw,4.6rem);line-height:.95}
+@media(max-width:900px){
+  .hero__media{height:auto}
+  .hero__media img{aspect-ratio:4/3;height:auto}
+  .hero__grid>div:first-child{margin:-3.5rem auto 0;padding:1.8rem 1.4rem}
+}
+
+.grid-4.cards{grid-template-columns:repeat(2,1fr);gap:1.4rem}
+.grid-4.cards .card{flex-direction:row}
+.grid-4.cards .card__media{flex:0 0 42%}
+.grid-4.cards .card__media a{display:block;height:100%}
+.grid-4.cards .card__media img{height:100%;object-fit:cover}
+.card{border:2px solid var(--line);box-shadow:none}
+.card:hover{transform:none;border-color:var(--brand)}
+@media(max-width:760px){
+  .grid-4.cards{grid-template-columns:1fr}
+  .grid-4.cards .card{flex-direction:column}
+  .grid-4.cards .card__media img{height:auto}
+}
+
+.sec-head.center{text-align:left;margin-inline:0}
+.sec-head h2::after{content:"";display:block;width:70px;height:5px;background:var(--brand);margin-top:.8rem;border-radius:3px}
+.band{background:#efe4d3;border-block:0}
+.tile{border:2px solid var(--line);box-shadow:none}
+.step{background:transparent;border:0;border-top:4px solid var(--brand);border-radius:0;padding:1.1rem 0 0}
+.step::before{opacity:1}
+
+.cta{background:#2c1d0d;border:0;border-radius:10px}
+.cta .btn--ghost{border-color:#faf3e9;color:#faf3e9}
+.cta .btn--ghost:hover{background:#faf3e9;border-color:#faf3e9;color:#2c1d0d}
+
+.footer{--bg-2:#2c1d0d;--bg-3:#3a2814;--line:#4a3520;--ink:#faf3e9;--ink-2:#d8c8b1;--ink-3:#b09d85;
+  background:var(--bg-2);color:var(--ink);border-top:0}
+.footer .logo b{color:#f59e0b}
+.priceblock{border:2px solid var(--line);background:#fffdf9}
