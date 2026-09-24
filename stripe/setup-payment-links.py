@@ -53,10 +53,19 @@ def call(key, method, path, data=None):
         detail = json.load(e).get("error", {})
         if e.code == 404:
             return None
-        raise SystemExit(
-            f"\nStripe refused {method} {path}: {detail.get('message', e.reason)}\n"
-            + ("Your restricted key is missing a permission. It needs WRITE on "
-               "Products, Prices and Payment links.\n" if e.code in (401, 403) else ""))
+        msg = str(detail.get("message", e.reason))
+        hint = ""
+        if e.code in (401, 403):
+            # Stripe answers 401 both for a key it has never seen and for a real
+            # key that lacks the scope. Only the second is a permissions problem,
+            # and guessing wrong sends you off to fix something that was never
+            # broken.
+            hint = ("That key does not exist. Check you pasted a real key and not\n"
+                    "the placeholder from the instructions.\n"
+                    if "Invalid API Key" in msg else
+                    "Your restricted key is missing a permission. It needs WRITE on\n"
+                    "Products, Prices and Payment links.\n")
+        raise SystemExit(f"\nStripe refused {method} {path}: {msg}\n" + hint)
 
 
 def flatten(d, prefix=""):
@@ -203,6 +212,11 @@ def main():
     if not key:
         raise SystemExit("Set STRIPE_API_KEY to a restricted key, e.g.\n"
                          "  STRIPE_API_KEY=rk_live_... python3 setup-payment-links.py")
+    if not key.startswith(("sk_", "rk_")):
+        # Catch the placeholder here rather than let Stripe reject it, which it
+        # does with a 401 that reads like a permissions problem.
+        raise SystemExit(f"STRIPE_API_KEY is not a Stripe key: {key[:12]}...\n"
+                         "It should start sk_ or rk_. Did you paste the placeholder?")
     if key.startswith("sk_"):
         print("! That is an unrestricted secret key. It works, but a restricted key with\n"
               "  write on Products, Prices and Payment links is the safer thing to use here.\n",
